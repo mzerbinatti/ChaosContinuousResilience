@@ -1,0 +1,17 @@
+{
+  "name": "chaoscr",
+  "version": "1.0.0",
+  "description": "Projeto dos artigos relacionados a Chaos Engineering e Continuous Resilience.",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michel Zerbinati",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "config": "^3.3.6",
+    "express": "^4.17.1"
+  }
+}

@@ -1,0 +1,37 @@
+1. Verificar npm e nodejs istalado
+
+-> npm -v
+-> node -v
+
+------------------------------
+
+2. Acessar a pasta onde ficará o projeto e digitar
+
+-> npm init (ou npm init -y, para os valores padrões)
+
+------------------------------
+
+3. Instalar bibliotecas usadas
+
+express - 4.17.1
+body-parser - 1.19.0
+nodemon - 2.0.12
+config - 3.3.6
+
+-> npm i -g nodemon@2.0.12 && npm i --save express@4.17.1 && npm i --save body-parser@1.19.0 && npm i --save config@3.3.6
+
+obs: a flag “i” significa “install” e o “— save” para gravar o pacote no nosso arquivo package.json.
+
+------------------------------
+
+4. Após configuar os arquivos iniciais do projeto (server.js, /config/express.js, /config/default.json), dá para iniciar o servidor
+
+-> nodemon server
+ou
+-> nodemon server.js
+ou
+-> npm start
+
+------------------------------
+
+
