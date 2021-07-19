@@ -1,0 +1,120 @@
+---
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Cloudformation para criacao do Ambiente NodeJS para Chaos Engineering"
+
+Resources:
+
+  VPCChaos:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames:  'true'
+
+  PublicSubNetChaosA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCChaos
+      CidrBlock: 10.0.1.0/24
+
+  # PublicSubNetChaosB:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref VPCChaos
+  #     CidrBlock: 10.0.2.0/24
+
+  # PrivateSubNetChaosA:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref VPCChaos
+  #     CidrBlock: 10.0.3.0/24
+
+  # PrivateSubNetChaosB:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref VPCChaos
+  #     CidrBlock: 10.0.4.0/24
+
+
+  IGWChaos:
+    Type: AWS::EC2::InternetGateway
+
+  AttachIGWChaos:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCChaos
+      InternetGatewayId: !Ref IGWChaos
+  
+  RTChaos:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCChaos
+
+  RTtoIGWChaos:
+    Type: AWS::EC2::Route
+    DependsOn: IGWChaos
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGWChaos
+      RouteTableId: !Ref RTChaos
+
+  RTAssociationChaos:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RTChaos
+      SubnetId: !Ref PublicSubNetChaosA
+
+
+  SecurityGroupChaos:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG com a porta 22, 8080 e a 80 inbound
+      VpcId: !Ref VPCChaos
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: http
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+  
+  InstanceChaos:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0dc2d3e4c0f9ebd18
+      InstanceType: t2.micro
+      # SubnetId: !Ref PublicSubNetChaosA
+      # SecurityGroupIds:
+      #   - !GetAtt SecurityGroupChaos.GroupId
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          GroupSet: 
+            - !GetAtt SecurityGroupChaos.GroupId
+          SubnetId:  !Ref PublicSubNetChaosA
+      Tags:
+        - Key: "Name"
+          Value: "ChaosNodeV1"
+      UserData:
+       "Fn::Base64": 
+          !Sub |
+            #!/bin/bash -v
+            # Get latest CloudFormation package - These packages change frequently
+            sudo yum update -y aws-cfn-bootstrap
+            # Install Node.js
+            sudo curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
+            sudo yum install nodejs -y
+            # Install git in your EC2 instance
+            sudo yum install git -y
+            # baixar o projeto
+            sudo git clone https://github.com/mzerbinatti/ChaosContinuousResilience.git
+            # Acessar pasta do projeto v1
+            cd ChaosContinuousResilience/v1/nodejs
+            # Instalar dependencias
+            npm install
+            # Iniciar aplicacao
+            node server.js
+

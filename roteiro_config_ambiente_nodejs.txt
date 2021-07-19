@@ -34,4 +34,9 @@ ou
 
 ------------------------------
 
+5. Fazer requisição na API:
+
+-> Acessar http://localhost:8080/api/v1/passagens-aereas
+
+------------------------------
 
